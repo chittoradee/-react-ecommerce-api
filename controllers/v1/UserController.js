@@ -10,7 +10,7 @@ const {
 //Login Api
 const login = async (req, res) => {
 	try {
-		const resMsg = validateAll("login", req.body, msg);
+		const resMsg = validateAll("login", req.body);
 		if (resMsg !== ""){
 			return errorResponse(req, res, null, resMsg);
 		}
