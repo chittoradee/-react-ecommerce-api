@@ -12,7 +12,9 @@ class helper{
     }
     
     uploadFile(filepath,file){
-        const tempPath = file.image.path;
+       // const tempPath = file.buffer;
+        /* var magic = file.buffer.toString('hex', 0, 4)
+        console.log(magic) */
         const folderPath = this.getImageUploadFolder();
         const timestamp =  this.getTimestamp();
         fs.mkdir(filepath+folderPath, { recursive: true }, function(err) {
@@ -22,15 +24,14 @@ class helper{
                 //console.log("New directory successfully created.")
             }
         });
-        const filename = folderPath+'/'+timestamp+"_"+file.image.name
-        const targetPath = filepath+filename;
-        mv(tempPath, targetPath, function (err) {
-            if (err) throw err;
-        });
+        const filename = folderPath+'/'+timestamp+"_"+file.originalname;
+        fs.writeFile(filepath+filename, file.buffer, 'binary', function(err) {
+            if (err) throw err
+        })
         return filename;
     }
 
-    async unlinkFile(filepath,file){      
+    async unlinkFile(filepath,file){
         fs.unlink(filepath+file, (err) => {
             if (err) {
                 return

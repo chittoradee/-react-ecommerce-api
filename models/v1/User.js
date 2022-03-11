@@ -41,6 +41,11 @@ const userSchema = new mongoose.Schema(
 			type: Boolean,
 			default: 0,
 		},
+		forgot_password_validate_string: {
+			type: String,
+			default: null,
+			required:false
+		},
 	},
 	{
 		timestamps: true,
@@ -88,7 +93,7 @@ function validateAll(api, data) {
 			"any.required": "Please enter password",
 		}),
 	}).options({ abortEarly: false });
-
+	
 	if (api === "signup") {
 		const { error } = firstNameSchema.validate({ first_name: data.first_name });
 		if (error) {
@@ -107,7 +112,7 @@ function validateAll(api, data) {
 		}
 	}
 
-	if (api === "login" || api === "signup" || api === "updateProfile") {
+	if (api === "login" || api === "signup" || api === "updateProfile" || api === 'forgotpassword') {
 		const { error } = emailSchema.validate({ email: data.email });
 		if (error) {
 			error.details.forEach((element) => {
@@ -126,5 +131,74 @@ function validateAll(api, data) {
 	}
 	return resMsg;
 }
-
-module.exports = { User, validateAll };
+function resetPasswordValidate(user) {
+	const schema = Joi.object({
+		forgot_password_validate_string: Joi.string().min(6).max(255).required().messages({
+			'string.empty': `Validate string is required.`,
+			'any.required': `Validate string is required.`
+		}),
+		new_password: Joi.string().min(6).max(255).required().messages({
+			'string.empty': `Please enter new password.`,
+			'string.min': `Password should have at least 6 characters.`,
+			'string.max': `Password should have at most 255 characters.`,
+			'any.required': `New Password field is required.`
+		}),
+		confirm_password: Joi.any().required().equal(Joi.ref('new_password')).empty('')
+			.label('Confirm password')
+			.options({
+				errors: {
+					wrap: {
+						label: ' '
+					}
+				},
+				messages: { 'any.only': '{{#label}} does not match' }
+			})
+	}).options({ abortEarly: false });
+	
+	const validation = schema.validate(user);
+	let resMsg = ''
+	
+	if (validation.error) {
+		validation.error.details.forEach((element) => {
+			resMsg = resMsg + "  " + element.message;
+		});
+	}
+	return resMsg;
+}
+function changePasswordValidate(user) {
+	const schema = Joi.object({
+		old_password: Joi.string().min(6).max(255).required().messages({
+			'string.empty': `Please enter old password.`,
+			'string.min': `Password should have at least 6 characters.`,
+			'string.max': `Password should have at most 255 characters.`,
+			'any.required': `Old Password field is required.`
+		}),
+		new_password: Joi.string().min(6).max(255).required().messages({
+			'string.empty': `Please enter new password.`,
+			'string.min': `Password should have at least 6 characters.`,
+			'string.max': `Password should have at most 255 characters.`,
+			'any.required': `New Password field is required.`
+		}),
+		confirm_password: Joi.any().required().equal(Joi.ref('new_password')).empty('')
+			.label('Confirm password')
+			.options({
+				errors: {
+					wrap: {
+						label: ' '
+					}
+				},
+				messages: { 'any.only': '{{#label}} does not match' }
+			})
+	}).options({ abortEarly: false });
+	
+	const validation = schema.validate(user);
+	let resMsg = ''
+	
+	if (validation.error) {
+		validation.error.details.forEach((element) => {
+			resMsg = resMsg + "  " + element.message;
+		});
+	}
+	return resMsg;
+}
+module.exports = { User, validateAll, resetPasswordValidate, changePasswordValidate };

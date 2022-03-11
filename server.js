@@ -1,5 +1,6 @@
 const express = require("express");
 require("dotenv").config();
+var cors = require('cors')
 const PORT = process.env.PORT || 3000;
 const app = express();
 
@@ -9,6 +10,7 @@ const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(express.json());
+app.use(cors())
 
 const Router = require("./routes/v1/routes");
 app.use(Router);
